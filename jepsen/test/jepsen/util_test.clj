@@ -109,3 +109,12 @@
                   _ (when (= a 3) (return :3))]
              4)
            :2))))
+
+(deftest timeout-test
+  (is ::success (timeout 1000 ::timed-out
+                         ::success))
+  (is ::timed-out (timeout 10 ::timed-out
+                           (Thread/sleep 1000)))
+  (is (thrown? ArithmeticException
+               (timeout 1000 ::timed-out
+                        (/ 1 0)))))
