@@ -84,6 +84,7 @@
   (cockroach/basic-test
     (merge
       {:name        "register"
+       :concurrency 10  ; must match first arg to concurrent-generator
        :client      {:client (AtomicClient. (atom false) nil)
                      :during (independent/concurrent-generator
                                10
@@ -100,4 +101,4 @@
                                   (checker/compose
                                     {:timeline     (timeline/html)
                                      :linearizable checker/linearizable}))})}
-      opts)))
+      (dissoc opts :concurrency))))
