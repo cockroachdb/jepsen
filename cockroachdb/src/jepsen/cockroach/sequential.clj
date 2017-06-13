@@ -170,6 +170,7 @@
       (merge
         {:name "sequential"
          :key-count 5
+         :concurrency 20  ; must be > (gen) argument above?
          :keyrange keyrange
          :client {:client (Client. 10 (atom false) nil)
                   :during (gen/stagger 1/100 gen)
@@ -177,4 +178,4 @@
          :checker (checker/compose
                     {:perf (checker/perf)
                      :sequential (checker)})}
-        opts))))
+        (dissoc opts :concurrency)))))
