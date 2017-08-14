@@ -50,6 +50,7 @@
 (def cockroach-start-arguments
   (concat [:start
            ;; ... other arguments here ...
+           "--vmodule" "txn=2,dist_sender=1,replica=1,txn_coord_sender=1"
            ]
           (if insecure [:--insecure] [])))
 
