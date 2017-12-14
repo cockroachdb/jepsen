@@ -49,6 +49,7 @@
 ;; Extra command-line arguments to give to `cockroach start`
 (def cockroach-start-arguments
   (concat [:start
+           "--max-offset=experimental-clockless"
            ;; ... other arguments here ...
            ]
           (if insecure [:--insecure] [])))
