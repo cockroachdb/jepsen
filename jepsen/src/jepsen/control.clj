@@ -100,7 +100,7 @@
   "Wraps command in a sudo subshell."
   [cmd]
   (if *sudo*
-    (merge cmd {:cmd (str "sudo -S -u " *sudo* " bash -c " (escape (:cmd cmd)))
+    (merge cmd {:cmd (str "sudo -S -u " *sudo* " bash -x -c " (escape (:cmd cmd)))
                 :in  (if *password*
                        (str *password* "\n" (:in cmd))
                        (:in cmd))})
