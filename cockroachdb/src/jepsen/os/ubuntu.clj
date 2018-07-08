@@ -33,6 +33,9 @@
                         :rsyslog
                         :tcpdump
                         :logrotate])
+
+       (info (c/exec :ls :-l "/var/run"))
+       (info (c/exec :ps :ax))
        ;; This occasionally fails (roughly 1% of the time) for no apparent reason
        ;; (no log messages I've been able to find). Sometimes it fails
        ;; several times in a row. Keep trying until the process is
