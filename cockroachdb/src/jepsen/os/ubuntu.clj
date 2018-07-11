@@ -34,7 +34,6 @@
                         :tcpdump
                         :logrotate])
 
-       (info (c/exec :ls :-l "/var/run/"))
        ;; This occasionally fails (roughly 1% of the time) for no apparent reason
        ;; (no log messages I've been able to find). Sometimes it fails
        ;; several times in a row. Keep trying until the process is
@@ -43,8 +42,8 @@
        ;; TODO: This assumes ubuntu 16.04, which uses ntpd. Ubuntu
        ;; 18.04 switches to chronyd instead so this will need to be
        ;; updated.
-       (c/su (c/exec :ps :ax (c/lit ";") :service :ntp :stop "||"
-                     :while "!" :pgrep :ntpd (c/lit ";") :do
+       (c/su (c/exec :service :ntp :stop "||"
+                     :while :pgrep :ntpd (c/lit ";") :do
                      :sleep "1" (c/lit ";") :service :ntp :stop "||" :true (c/lit ";")
                      :done)))
 
