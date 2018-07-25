@@ -2,7 +2,8 @@
   "Common tasks for Ubuntu/CockroachDB boxes."
   (:use clojure.tools.logging)
   (:require [clojure.set :as set]
-            [jepsen.util :refer [meh]]
+            [jepsen.util :refer [meh
+                                 with-retry]]
             [jepsen.os :as os]
             [jepsen.os.debian :as debian]
             [jepsen.control :as c]
@@ -36,19 +37,18 @@
 
        ;; This occasionally fails (roughly 1% of the time) for no apparent reason
        ;; (no log messages I've been able to find). Sometimes it fails
-       ;; several times in a row. Keep trying until the process is
-       ;; gone.
+       ;; several times in a row. Keep trying until the command succeeds.
        ;;
        ;; TODO: This assumes ubuntu 16.04, which uses ntpd. Ubuntu
        ;; 18.04 switches to chronyd instead so this will need to be
        ;; updated.
-       (c/su (c/exec :if :service :ntp :stop (c/lit ";") :then
-                     :true (c/lit ";")
-                     :else
-                     :while :pgrep :ntpd (c/lit ";") :do
-                     :sleep "1" (c/lit ";") :service :ntp :stop "||" :true (c/lit ";")
-                     :done
-                     :fi)))
+       (with-retry [tries 3]
+         (c/su (c/exec :service :ntp :stop))
+         (catch RuntimeException e
+           (if (pos? tries)
+             (do (Thread/sleep (+1000 (rand-int 1000)))
+                 (retry (dec tries)))
+             (throw e)))))
 
       (meh (net/heal! (:net test) test)))
 
