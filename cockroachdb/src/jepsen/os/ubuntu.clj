@@ -46,7 +46,7 @@
          (c/su (c/exec :service :ntp :stop))
          (catch RuntimeException e
            (if (pos? tries)
-             (do (Thread/sleep (+1000 (rand-int 1000)))
+             (do (Thread/sleep (+ 1000 (rand-int 1000)))
                  (retry (dec tries)))
              (throw e)))))
 
