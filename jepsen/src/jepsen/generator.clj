@@ -488,30 +488,30 @@
           ; thread set
           (try
             (swap! threads conj (Thread/currentThread))
-            ; Grab an operation from the underlying generator
-            (op source test process)
+            (try
+              ; Grab an operation from the underlying generator
+              (op source test process)
+              (finally
+                (locking threads
+                  (swap! threads disj (Thread/currentThread)))))
+            (catch InterruptedException sea-lion
+              ; Okay. SOMEONE interrupted us. We're definitely not executing any
+              ; more.
+              (if @interrupted?
+                nil
+                (throw sea-lion)))
+
+            ; Ugh this is SUCH a special case thing but BrokenBarrier is also a
+            ; sort of interrupted exception???
+            (catch BrokenBarrierException sea-lion
+              (if @interrupted?
+                nil
+                (throw sea-lion)))
             (finally
+              ; We might have been interrupted during the first finally clause,
+              ; so make one more attempt to clean up.
               (locking threads
-                (swap! threads disj (Thread/currentThread))))))
-
-        (catch InterruptedException sea-lion
-          ; Okay. SOMEONE interrupted us. We're definitely not executing any
-          ; more. We could have been interrupted FROM the finally block, so
-          ; we need to remove ourselves from the executing set again...
-          (locking threads
-            (swap! threads disj (Thread/currentThread)))
-          (if @interrupted?
-            nil
-            (throw sea-lion)))
-
-        ; Ugh this is SUCH a special case thing but BrokenBarrier is also a
-        ; sort of interrupted exception???
-        (catch BrokenBarrierException sea-lion
-          (locking threads
-            (swap! threads disj (Thread/currentThread)))
-          (if @interrupted?
-            nil
-            (throw sea-lion))))))
+                (swap! threads disj (Thread/currentThread)))))))))
 
 (defn time-limit
   "Yields operations from the underlying generator until dt seconds have
