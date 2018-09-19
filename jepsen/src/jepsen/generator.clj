@@ -469,6 +469,8 @@
                                            ; Mark ourself as interrupting
                                            (reset! interrupted? true)
 
+                                           (info "interrupting from generator time limit")
+
                                            ; Interrupt those threads
                                            (locking threads
                                              (doseq [t @threads]

@@ -217,6 +217,7 @@
         abort!          (fn abort! [w]
                           (deliver aborting-worker w)
                           (mapv abort-worker! workers)
+                          (info "interrupting from run-workers")
                           (.interrupt thread-group))
         run-latch       (CountDownLatch. n)
         teardown-latch  (CountDownLatch. n)
@@ -622,4 +623,3 @@
             (analyze! test))))
       (finally
         (store/stop-logging!)))))
-
