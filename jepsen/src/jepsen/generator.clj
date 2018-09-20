@@ -474,6 +474,7 @@
                                            ; Interrupt those threads
                                            (locking threads
                                              (doseq [t @threads]
+                                               (info "interrupting" t)
                                                (.interrupt t)))
 
                                            ; Wait for interrupt processing to

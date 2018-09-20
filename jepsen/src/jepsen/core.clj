@@ -173,6 +173,7 @@
            (try (.countDown run-latch)
                 (info "Running" name)
                 (run-worker! worker)
+                (info "worker " name " terminated normally")
                 ; Normal termination
                 (.countDown teardown-latch)
                 (try (info "Stopping" name)
