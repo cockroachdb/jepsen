@@ -72,9 +72,10 @@
 
                 (jepsen/synchronize test)
                 (when (= node (jepsen/primary test))
+                  (auto/csql! "set cluster setting kv.range_merge.queue_enabled = true")
                   (auto/set-replication-zone! ".default"
-                                              {:range_min_bytes 1024
-                                               :range_max_bytes 1048576})
+                                              {:range_min_bytes (* 1024 1024)
+                                               :range_max_bytes (* 64 1024 1024)})
                   (info node "Creating database...")
                   (auto/csql! (str "create database " dbname)))
 
