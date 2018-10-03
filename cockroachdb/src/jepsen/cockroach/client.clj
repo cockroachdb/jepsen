@@ -304,7 +304,7 @@
 (defn split!
   "Split the given table at the given key."
   [conn table k]
-  (query conn [(str "alter table " (name table) " split at values ("
+  (query conn [(str "set experimental_force_split_at = true; alter table " (name table) " split at values ("
                     (if (number? k)
                       k
                       (str "'" k "'"))
