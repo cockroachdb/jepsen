@@ -309,7 +309,7 @@
 
 (defn split
   []
-  {:during (gen/delay 2 {:type :info, :f :split})
+  {:during (gen/delay 0.3 {:type :info, :f :split})
    :final  nil
    :name   "splits"
    :client (split-nemesis)

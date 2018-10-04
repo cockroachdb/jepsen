@@ -91,8 +91,8 @@
                                (range)
                                (fn [k]
                                  (->> (gen/reserve 5 (gen/mix [w cas cas]) r)
-                                      (gen/delay-til 1/2)
-                                      (gen/stagger 0.1)
+                                      (gen/delay-til 1/4)
+                                      (gen/stagger 0.05)
                                       (gen/limit 100))))}
        :model       (model/cas-register 0)
        :checker     (checker/compose
