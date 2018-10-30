@@ -71,7 +71,7 @@
               (catch org.postgresql.util.PSQLException e
                 (if (re-find #"ERROR: restart transaction" (.getMessage e))
                   ; Definitely failed
-                  (assoc op :type :fail)
+                  (assoc op :type :fail :error [:restart-transaction (.getMessage e)])
                   (throw e)))))))))
 
   (teardown! [this test]
