@@ -17,6 +17,7 @@
                               [bank :as bank]
                               [comments :as comments]
                               [register :as register]
+                              [multiregister :as multiregister]
                               [monotonic :as monotonic]
                               [nemesis :as cln]
                               [sets :as sets]
@@ -28,6 +29,7 @@
    "bank-multitable"      bank/multitable-test
    "comments"             comments/test
    "register"             register/test
+   "multi-register"       multiregister/test
    "monotonic"            monotonic/test
    "sets"                 sets/test
    "sequential"           sequential/test

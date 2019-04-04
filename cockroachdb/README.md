@@ -27,6 +27,9 @@ The following tests are implemented:
 ``register``
   concurrent atomic updates to a shared register;
 
+``multi-register``
+  concurrent atomic updates to multiple shared registers;
+
 ``sets``
   concurrent unique appends to a shared table;
 
@@ -92,13 +95,30 @@ Nemeses:
 Jepsen will test every combination of `nemesis` and `nemesis2`, except where
 both nemeses would be identical, or both would introduce clock skew.
 
-Test details: atomic updates
------------------------------
+Test details: register
+----------------------
 
 One table contains a single row.
 
 Jepsen sends concurrently to different nodes either read, write or
 atomic compare-and-swap operations.
+
+Each node may report ok, the operation is known to have succeeded;
+fail, the operation is known to have failed; and unknown otherwise
+(e.g. the connection dropped before the answer could be read).
+
+At the end, a linearizability checker validates that the trace of
+reads as observed from each client is compatible with a linearizable
+history of across all nodes.
+
+Test details: multi-register
+----------------------------
+
+One table containing a fixed set of rows.
+
+Jepsen sends concurrently to different nodes transactions that
+either read from a random subset of registers or write to a random
+subset of registers.
 
 Each node may report ok, the operation is known to have succeeded;
 fail, the operation is known to have failed; and unknown otherwise
@@ -159,7 +179,8 @@ fail, the operation is known to have failed; and unknown otherwise
 At the end, the checker validates that the sum of the remaining
 balances of all accounts is the same as the initial sum.
 
-## Test details: sequential
+Test details: sequential
+------------------------
 
 Cockroach does not offer strict serializability. However, as a consequence of
 its implementation of hybrid logical clocks, all transactions *on a particular
@@ -179,13 +200,15 @@ occur from the same process, they must also be visible to any single process in
 that order. This implies that once a process observes k<sub>n</sub>, any
 subsequent read must see k<sub>n-1</sub>, and by induction, all smaller keys.
 
-## Test details: G2
+Test details: G2
+----------------
 
 Transactions select a predicate over two tables, then insert to one or the
 other if no rows are present. Serializability implies that at most one
 transaction may commit per predicate.
 
-## Test details: comments
+Test details: comments
+----------------------
 
 This test demonstrates a known strict serializability violation in Cockroach
 and is intended to fail. It performs a sequence of concurrent inserts to a
