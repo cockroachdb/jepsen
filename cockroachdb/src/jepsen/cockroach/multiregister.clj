@@ -64,7 +64,7 @@
             (info "Created table" t))))))
 
   (invoke! [this test op]
-    (c/with-idempotent #{:read}
+    (c/with-idempotent-txn #{:read}
       (c/with-exception->op op
         (c/with-conn [c conn]
           (c/with-timeout
@@ -73,7 +73,7 @@
                 (let [[ik txn] (:value op)
                       txn' (mapv
                             (fn [[f id val]]
-                              (let [t (id->table id)
+                              (let [t    (id->table id)
                                     val' (case f
                                            :read
                                            (-> c
@@ -115,7 +115,7 @@
                             (fn [k]
                               (->> (gen/mix [r w])
                                    (gen/stagger 1/100)
-                                   (gen/limit 100))))}
+                                   (gen/limit 60))))}
      :model       (model/multi-register {})
      :checker     (checker/compose
                    {:perf   (checker/perf)

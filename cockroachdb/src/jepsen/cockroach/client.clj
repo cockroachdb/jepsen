@@ -116,6 +116,17 @@
     (assoc op :type :fail)
     op))
 
+(defn with-idempotent-txn
+  "Takes a predicate on operation functions, and a txn op, presumably resulting
+  from a client call. If idempotent? is truthy for all of the txn's operations,
+  remaps :info types to :fail."
+  [idempotent? op]
+  (let [[_ txn] (:value op)
+        fs      (map first txn)]
+    (if (and (every? idempotent? fs) (= :info (:type op)))
+      (assoc op :type :fail)
+      op)))
+
 (defmacro with-timeout
   "Like util/timeout, but throws (RuntimeException. \"timeout\") for timeouts.
   Throwing means that when we time out inside a with-conn, the connection state
