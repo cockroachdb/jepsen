@@ -26,8 +26,11 @@
 ;; CockroachDB user and db name for jdbc-mode = :cdb-*
 (def db-user "root")
 (def db-passwd "dummy")
-(def db-port 26257)
 (def dbname "jepsen") ; will get created automatically
+
+;; Ports
+(def db-port 26257)
+(def http-port 26258)
 
 ;; Paths
 (def working-path "Home directory for cockroach setup" "/opt/cockroach")
@@ -49,6 +52,8 @@
 ;; Extra command-line arguments to give to `cockroach start`
 (def cockroach-start-arguments
   (concat [:start
+           :--port      db-port
+           :--http-port http-port
            ;; ... other arguments here ...
            ]
           (if insecure [:--insecure] [])))

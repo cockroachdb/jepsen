@@ -116,6 +116,17 @@
     (assoc op :type :fail)
     op))
 
+(defn with-idempotent-txn
+  "Takes a predicate on operation functions, and a txn op, presumably resulting
+  from a client call. If idempotent? is truthy for all of the txn's operations,
+  remaps :info types to :fail."
+  [idempotent? op]
+  (let [[_ txn] (:value op)
+        fs      (map first txn)]
+    (if (and (every? idempotent? fs) (= :info (:type op)))
+      (assoc op :type :fail)
+      op)))
+
 (defmacro with-timeout
   "Like util/timeout, but throws (RuntimeException. \"timeout\") for timeouts.
   Throwing means that when we time out inside a with-conn, the connection state
@@ -285,6 +296,11 @@
   [conn table values where]
   (j/update! conn table values where {:timeout timeout-delay}))
 
+(defn execute!
+  "Like jdbc execute!, but includes a default timeout."
+  [conn sql-params]
+    (j/execute! conn sql-params {:timeout timeout-delay}))
+
 (defn db-time
   "Retrieve the current time (precise, monotonic) from the database."
   [c]
@@ -301,11 +317,19 @@
              (.toBigInteger)
              (str))))
 
+(defn val->sql-str
+  "Converts a scalar value to its SQL string representation"
+  [v]
+  (if (number? v)
+    v
+    (str "'" v "'")))
+
 (defn split!
   "Split the given table at the given key."
   [conn table k]
   (query conn [(str "alter table " (name table) " split at values ("
-                    (if (number? k)
-                      k
-                      (str "'" k "'"))
+                    (if (coll? k)
+                      (str/join ", "
+                        (map val->sql-str k))
+                      (val->sql-str k))
                     ")")]))
