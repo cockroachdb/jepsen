@@ -110,12 +110,12 @@
     {:name        "multi-register"
      :client      {:client (MultiAtomicClient. (atom false) nil)
                    :during (independent/concurrent-generator
-                            (count (:nodes opts))
+                            3
                             (range)
                             (fn [k]
                               (->> (gen/mix [r w])
-                                   (gen/stagger 1/100)
-                                   (gen/limit 60))))}
+                                   (gen/stagger 0.1)
+                                   (gen/limit 30))))}
      :model       (model/multi-register {})
      :checker     (checker/compose
                    {:perf   (checker/perf)
