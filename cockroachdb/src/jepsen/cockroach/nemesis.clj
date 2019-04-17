@@ -279,7 +279,11 @@
    (let [already-split (atom {})] ; A map of tables to sets of keys split
      (reify nemesis/Nemesis
        (setup! [this test]
-         (split-nemesis (mapv cc/client (:nodes test))))
+         (let [clients (mapv cc/client (:nodes test))]
+           ; Disable range merging. Without doing so, splits will be disallowed
+           (cc/with-conn [c (first clients)]
+             (cc/set-cluster-setting! c "kv.range_merge.queue_enabled" false))
+           (split-nemesis clients)))
 
        (invoke! [this test op]
          (assoc op :value
