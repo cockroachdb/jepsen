@@ -299,7 +299,15 @@
 (defn execute!
   "Like jdbc execute!, but includes a default timeout."
   [conn sql-params]
-    (j/execute! conn sql-params {:timeout timeout-delay}))
+  (j/execute! conn sql-params {:timeout timeout-delay}))
+
+(defn set-cluster-setting!
+  "Sets the cluster setting to the specified value."
+  [conn setting value]
+  (j/execute! conn 
+              (str "set cluster setting " setting " = " value)
+              ; SET CLUSTER SETTING must be run outside of a txn
+              {:transaction? false :timeout timeout-delay}))
 
 (defn db-time
   "Retrieve the current time (precise, monotonic) from the database."
