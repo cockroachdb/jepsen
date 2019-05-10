@@ -61,6 +61,7 @@
           (doseq [t table-names]
             (j/execute! c [(str "create table " t
                                 " (ik int primary key, val int)")])
+            (j/execute! c [(str "alter table " t " scatter")])
             (info "Created table" t))))))
 
   (invoke! [this test op]
