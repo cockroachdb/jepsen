@@ -3,7 +3,6 @@
   (:require [clojure.tools.logging :refer :all]
             [clojure.java.io :as io]
             [clojure.string :as str]
-            [clj-yaml.core :as yaml]
             [jepsen.util :as util]
             [jepsen [core :as jepsen]
                     [control :as c :refer [|]]]
@@ -100,29 +99,13 @@
            [:-e ~@body]
            [:>> errlog (c/lit "2>&1")]))))
 
-(defn replication-zone
-  "Gets the replication zone on a given node. With no args, fetches the default
-  zone."
-  ([]
-   (replication-zone ".default"))
-  ([name]
-   (yaml/parse-string
-     (c/cd working-path
-           (c/exec cockroach :zone :get name (when insecure :--insecure))))))
-
 (defn set-replication-zone!
-  "Sets the replication zone on the given node. Returns the new replication
-  zone."
-  [name zone]
-  (c/sudo cockroach-user
-          (-> (c/cd working-path
-                    (c/exec :echo (yaml/generate-string zone) |
-                            cockroach :zone :set
-                            (when insecure :--insecure)
-                            :--file=-
-                            name))
-              (str/replace #"UPDATE .+\n" "")
-              (yaml/parse-string))))
+  "Sets the replication zone on the given node."
+  [zone config]
+  (csql! (str
+    "alter range " zone " configure zone using "
+    (str/join ", "
+      (map (fn [[k v]] (str (name k) " = " v)) config)))))
 
 (defn install-bumptime!
   "Install time adjusting binary"
