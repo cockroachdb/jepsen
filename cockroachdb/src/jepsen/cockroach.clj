@@ -109,11 +109,7 @@
           (info node "Stopping tcpdump...")
           (meh (c/exec :killall -9 :tcpdump))
 
-          (info node "Clearing the logs...")
-          (doseq [f log-files]
-            (when (cu/exists? f)
-              (c/exec :truncate :-c :--size 0 f)
-              (c/exec :chown cockroach-user f))))))
+          )))
 
     db/LogFiles
     (log-files [_ test node] log-files)))

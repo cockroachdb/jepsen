@@ -54,7 +54,7 @@
            :--port      db-port
            :--http-port http-port
            ;; ... other arguments here ...
-           :--vmodule "conn_executor=2"
+           :--vmodule "conn_executor=2,exec_log=2"
            ]
           (if insecure [:--insecure] [])))
 
