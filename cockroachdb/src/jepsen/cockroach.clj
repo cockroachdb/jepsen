@@ -70,6 +70,10 @@
                   (auto/start! test node)
                   (Thread/sleep 5000)) ; Give it time to join
 
+                (when (= node (jepsen/primary test))
+                  (auto/init! node)
+                  (Thread/sleep 5000))
+
                 (jepsen/synchronize test)
                 (when (= node (jepsen/primary test))
                   (auto/set-replication-zone! "default"
