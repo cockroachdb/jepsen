@@ -57,6 +57,13 @@
            ]
           (if insecure [:--insecure] [])))
 
+;; Extra command-line arguments to give to `cockroach init`
+(def cockroach-init-arguments
+  (concat [:init
+           ;; ... other arguments here ...
+           ]
+          (if insecure [:--insecure] [])))
+
 (defn control-addr
   "Address of the Jepsen control node, as seen by the local node. Used to
   filter packet captures."
@@ -162,16 +169,21 @@
    extra-args
    [:--logtostderr :>> errlog (c/lit "2>&1")]))
 
-(defn runcmd
-  "The command to run cockroach for a given test"
-  [test node joining?]
-  (let [join (if joining?
-               [(->> (:nodes test)
+(defn cockroach-init-cmdline
+  "Construct the command line to initialize a CockroachDB cluster."
+  []
+  (concat
+   [(c/expand-path cockroach)]
+   cockroach-init-arguments))
+
+(defn startcmd
+  "The command to start cockroach for a given test"
+  [test node]
+  (let [join [(->> (:nodes test)
                      (remove #{node})
                      (map name)
                      (str/join ",")
-                     (str "--join="))]
-               [])]
+                     (str "--join="))]]
     (wrap-env [(str "COCKROACH_LINEARIZABLE="
                     (if (:linearizable test) "true" "false"))
                (str "COCKROACH_MAX_OFFSET=" "250ms")]
@@ -186,10 +198,23 @@
                          (catch RuntimeException e "")))
             (info node "Cockroach already running.")
             (do (info node "Starting CockroachDB...")
-                (c/trace (c/exec (runcmd test node
-                                         (not= node (jepsen/primary test)))))
+                (c/trace (c/exec (startcmd test node)))
                 (info node "Cockroach started"))))
   :started)
+
+(defn initcmd
+  "The command to initialize cockroach for a given test"
+  []
+  (cockroach-init-cmdline))
+
+(defn init!
+  "Initialize cockroachdb cluster"
+  [node]
+  (c/sudo cockroach-user
+          (do (info node "Initializing CockroachDB...")
+              (c/trace (c/exec (initcmd)))
+              (info node "Cockroach initialized")))
+  :initialized)
 
 (defn kill!
   "Kills cockroach on node."
