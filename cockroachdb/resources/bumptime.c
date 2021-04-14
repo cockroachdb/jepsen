@@ -17,9 +17,8 @@ int main(int argc, char **argv) {
 
     /* Get current time */
     struct timeval time;
-    struct timezone tz;
 
-    if (0 != gettimeofday(&time, &tz)) {
+    if (0 != gettimeofday(&time, NULL)) {
       perror("gettimeofday");
       return 1;
     }
@@ -38,7 +37,7 @@ int main(int argc, char **argv) {
     }
 
     /* Set time */
-    if (0 != settimeofday(&time, &tz)) {
+    if (0 != settimeofday(&time, NULL)) {
       perror("settimeofday");
       return 2;
     }
