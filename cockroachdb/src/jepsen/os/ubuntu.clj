@@ -38,12 +38,10 @@
        ;; several times in a row. Keep trying until the process is
        ;; gone.
        ;;
-       ;; TODO: This assumes ubuntu 16.04, which uses ntpd. Ubuntu
-       ;; 18.04 switches to chronyd instead so this will need to be
-       ;; updated.
-       (c/su (c/exec :service :ntp :stop "||"
+       ;; Works for Ubuntu 18.04, 20.04 as of now.
+       (c/su (c/exec :service :chrony :stop "||"
                      :while "!" :pgrep :ntpd (c/lit ";") :do
-                     :sleep "1" (c/lit ";") :service :ntp :stop "||" :true (c/lit ";")
+                     :sleep "1" (c/lit ";") :service :chrony :stop "||" :true (c/lit ";")
                      :done)))
 
       (meh (net/heal! (:net test) test)))
