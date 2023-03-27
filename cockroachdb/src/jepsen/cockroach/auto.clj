@@ -167,7 +167,8 @@
                      (str "--join="))]]
     (wrap-env [(str "COCKROACH_LINEARIZABLE="
                     (if (:linearizable test) "true" "false"))
-               (str "COCKROACH_MAX_OFFSET=" "250ms")]
+               (str "COCKROACH_MAX_OFFSET=" "250ms")
+               (str "COCKROACH_MIN_RANGE_MAX_BYTES=0")]
               (cockroach-start-cmdline join))))
 
 (defn start!
