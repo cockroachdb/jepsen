@@ -15,6 +15,7 @@
             [clojure.java.jdbc :as j]
             [clojure.set :as set]
             [clojure.tools.logging :refer :all]
+            [knossos.model :as model]
             [knossos.op :as op]))
 
 (defn parse-row
@@ -169,7 +170,7 @@
   per-process basis."
   [linearizable global?]
   (reify checker/Checker
-    (check [this test history opts]
+    (check [this test model history opts]
       (let [add-values (->> history
                             (r/filter op/ok?)
                             (r/filter #(= :add (:f %)))
