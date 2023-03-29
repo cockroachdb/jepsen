@@ -1,12 +1,12 @@
-(defproject cockroachdb "0.2.0"
+(defproject cockroachdb "0.1.0"
   :description "Jepsen testing for CockroachDB"
   :url "http://cockroachlabs.com/"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.10.0"]
-                 [jepsen "0.1.19"]
-                 [org.clojure/java.jdbc "0.7.12"]
-                 [org.postgresql/postgresql "42.1.3"]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [jepsen "0.1.9-SNAPSHOT"]
+                 [org.clojure/java.jdbc "0.6.1"]
+                 [org.postgresql/postgresql "9.4.1211"]]
   :jvm-opts ["-Xmx12g"
              "-XX:+UseConcMarkSweepGC"
              "-XX:+UseParNewGC"

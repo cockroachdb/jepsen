@@ -24,6 +24,7 @@
             [clojure.core.reducers :as r]
             [clojure.set :as set]
             [clojure.tools.logging :refer :all]
+            [knossos.model :as model]
             [knossos.op :as op]))
 
 (def table-prefix "String prepended to all table names." "comment_")
@@ -89,7 +90,7 @@
 (defn checker
   []
   (reify checker/Checker
-    (check [this test history opts]
+    (check [this test model history opts]
       ; Determine first-order write precedence graph
       (let [expected (loop [completed  (sorted-set)
                             expected   {}
