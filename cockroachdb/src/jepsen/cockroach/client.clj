@@ -213,7 +213,7 @@
         {:type :fail, :error :connection-refused}
 
         #"context deadline exceeded"
-        {:type :fail, :error :context-deadline-exceeded}
+        {:type :fail, :error [:context-deadline-exceeded m]}
 
         #"rejecting command with timestamp in the future"
         {:type :fail, :error :reject-command-future-timestamp}
