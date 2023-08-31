@@ -225,6 +225,15 @@
         #"result is ambiguous"
         {:type :info, :error [:result-ambiguous m]}
 
+        ; Historically, these tests interpret context deadline exceeded as a
+        ; definite failure.
+        ;
+        ; TODO(pavelkalinnikov): consider classifying it as ambiguous error by
+        ; default. Context can be canceled at any layer of the stack, and it
+        ; usually doesn't mean that the request didn't leave any side effects.
+        #"context deadline exceeded"
+        {:type :fail, :error [:context-deadline-exceeded m]}
+
         ; By default, interpret errors as ambiguous by marking them as :info.
         ;
         ; TODO(pavelkalinnikov): do better at detecting "ambiguous" errors
