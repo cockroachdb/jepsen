@@ -212,9 +212,6 @@
         #"Connection .+? refused"
         {:type :fail, :error :connection-refused}
 
-        #"context deadline exceeded"
-        {:type :fail, :error [:context-deadline-exceeded m]}
-
         #"rejecting command with timestamp in the future"
         {:type :fail, :error :reject-command-future-timestamp}
 
@@ -224,6 +221,15 @@
         #"restart transaction"
         {:type :fail, :error [:restart-transaction m]}
 
+        ; Explicitly indicates that the operation may or may not succeed.
+        #"result is ambiguous"
+        {:type :info, :error [:result-ambiguous m]}
+
+        ; By default, interpret errors as ambiguous by marking them as :info.
+        ;
+        ; TODO(pavelkalinnikov): do better at detecting "ambiguous" errors
+        ; above. If all the cases are covered above, we can then safely assign
+        ; type :fail to unknown errors by default.
         {:type :info, :error [:psql-exception m]})
 
       clojure.lang.ExceptionInfo
