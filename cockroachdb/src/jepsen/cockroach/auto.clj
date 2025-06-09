@@ -39,7 +39,7 @@
 (def log-path "Log directory" (str working-path "/logs"))
 (def verlog "Version log file" (str log-path "/version.txt"))
 (def pcaplog "pcap log file" (str log-path "/trace.pcap"))
-(def errlog (str log-path "/cockroach.stderr"))
+(def errlog (str log-path "/cockroach.log"))
 (def log-files (if (= jdbc-mode :cdb-cluster) [errlog verlog pcaplog] []))
 
 (def insecure
