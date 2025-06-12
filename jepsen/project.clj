@@ -18,17 +18,15 @@
                  [byte-streams "0.2.2"]
                  [dom-top "1.0.3-SNAPSHOT"]
                  [slingshot "0.12.2"]
-                 [org.clojure/data.codec "0.1.1"]]
+                 [org.clojure/data.codec "0.1.1"]
+                 [jakarta.xml.bind/jakarta.xml.bind-api "2.3.3"]]
   :main jepsen.cli
   :plugins [[lein-localrepo "0.5.4"]
             [lein-codox "0.10.3"]]
   :aot [jepsen.cli clojure.tools.logging.impl]
 ;        clojure.tools.logging.impl]
-  :jvm-opts ["-Xmx32g" "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC"
-             "-XX:+CMSParallelRemarkEnabled" "-XX:+AggressiveOpts"
-             "-XX:+UseFastAccessorMethods" "-server"
-             ;"-XX:-OmitStackTraceInFastThrow"
-             ]
+  :javac-options ["--release" "17"]
+  :jvm-opts ["-Xmx12g"]
   :codox {:output-path "doc/"
           :source-uri "https://github.com/jepsen-io/jepsen/blob/{version}/jepsen/{filepath}#L{line}"
           :metadata {:doc/format :markdown}})
