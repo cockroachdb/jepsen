@@ -58,12 +58,41 @@
 ;   "start-kill"                 `(cln/startkill 1)
    "start-kill-2"               `(cln/startkill 2)})
 
+(defn parse-cockroach-start-args
+  "Parses repeated NODE=ARG values into a map of node names to ordered
+  CockroachDB start arguments."
+  [parsed]
+  (update parsed :options
+          (fn [options]
+            (let [nodes (set (map name (:nodes options)))
+                  start-args
+                  (reduce
+                   (fn [args encoded]
+                     (let [[node arg] (str/split encoded #"=" 2)]
+                       (when (or (str/blank? node) (str/blank? arg))
+                         (throw (IllegalArgumentException.
+                                 (str "Invalid --cockroach-start-arg " encoded
+                                      "; expected NODE=ARG"))))
+                       (when-not (contains? nodes node)
+                         (throw (IllegalArgumentException.
+                                 (str "Unknown node in --cockroach-start-arg: " node))))
+                       (update args node (fnil conj []) arg)))
+                   {}
+                   (:cockroach-start-arg options))]
+              (-> options
+                  (assoc :cockroach-start-args start-args)
+                  (dissoc :cockroach-start-arg))))))
+
 (def opt-spec
   "Command line options for tools.cli"
   [[nil "--force-download" "Always download HTTP/S tarballs"]
 
    ["-l" "--linearizable" "Whether to run cockroack in linearizable mode"
     :default false]
+
+   (jc/repeated-opt nil "--cockroach-start-arg NODE=ARG"
+                    "Additional CockroachDB start argument for NODE. May be repeated."
+                    [])
 
    (jc/repeated-opt nil "--nemesis NAME" "Which nemeses to use"
                     [`(cln/none)]
@@ -117,6 +146,7 @@
            :opt-fn (fn [parsed]
                      (-> parsed
                          jc/test-opt-fn
+                         parse-cockroach-start-args
                          jc/validate-tarball
                          (jc/rename-options {:nemesis   :nemeses
                                              :nemesis2  :nemeses2
