@@ -164,12 +164,13 @@
                      (remove #{node})
                      (map name)
                      (str/join ",")
-                     (str "--join="))]]
+                     (str "--join="))]
+        extra-args (get (:cockroach-start-args test) (name node) [])]
     (wrap-env [(str "COCKROACH_LINEARIZABLE="
                     (if (:linearizable test) "true" "false"))
                (str "COCKROACH_MAX_OFFSET=" "250ms")
                (str "COCKROACH_MIN_RANGE_MAX_BYTES=0")]
-              (cockroach-start-cmdline join))))
+              (apply cockroach-start-cmdline (concat join extra-args)))))
 
 (defn start!
   "Start cockroachdb on node."
