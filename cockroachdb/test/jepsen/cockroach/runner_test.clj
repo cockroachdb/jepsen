@@ -28,3 +28,18 @@
        #"Unknown node"
        (runner/parse-cockroach-start-args
         {:options {:nodes ["n1"] :cockroach-start-arg ["n2=--foo"]}}))))
+
+(deftest parse-cockroach-env-test
+  (let [env ["COCKROACH_EXAMPLE_SETTING=true" "EMPTY=" "WITH_EQUALS=a=b"]]
+    (is (= {:options {:cockroach-env env}}
+           (runner/parse-cockroach-env {:options {:cockroach-env env}})))))
+
+(deftest parse-cockroach-env-rejects-invalid-values-test
+  (doseq [[env msg] [[["NOVALUE"] #"expected KEY=VALUE"]
+                     [["1BAD=x"] #"expected KEY=VALUE"]
+                     [["=x"] #"expected KEY=VALUE"]
+                     [["COCKROACH_MAX_OFFSET=1s"] #"cannot override COCKROACH_MAX_OFFSET"]
+                     [["A=1" "A=2"] #"Duplicate --cockroach-env A"]]]
+    (is (thrown-with-msg?
+         IllegalArgumentException msg
+         (runner/parse-cockroach-env {:options {:cockroach-env env}})))))
