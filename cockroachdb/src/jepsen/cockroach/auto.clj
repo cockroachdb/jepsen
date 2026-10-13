@@ -157,6 +157,11 @@
    [(c/expand-path cockroach)]
    cockroach-init-arguments))
 
+(def managed-env-vars
+  "Environment variables that startcmd always sets for the CockroachDB server.
+  --cockroach-env may not override them."
+  #{"COCKROACH_LINEARIZABLE" "COCKROACH_MAX_OFFSET" "COCKROACH_MIN_RANGE_MAX_BYTES"})
+
 (defn startcmd
   "The command to start cockroach for a given test"
   [test node]
@@ -166,10 +171,12 @@
                      (str/join ",")
                      (str "--join="))]
         extra-args (get (:cockroach-start-args test) (name node) [])]
-    (wrap-env [(str "COCKROACH_LINEARIZABLE="
-                    (if (:linearizable test) "true" "false"))
-               (str "COCKROACH_MAX_OFFSET=" "250ms")
-               (str "COCKROACH_MIN_RANGE_MAX_BYTES=0")]
+    (wrap-env (concat
+               [(str "COCKROACH_LINEARIZABLE="
+                     (if (:linearizable test) "true" "false"))
+                (str "COCKROACH_MAX_OFFSET=" "250ms")
+                (str "COCKROACH_MIN_RANGE_MAX_BYTES=0")]
+               (:cockroach-env test))
               (apply cockroach-start-cmdline (concat join extra-args)))))
 
 (defn start!

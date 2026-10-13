@@ -13,6 +13,7 @@
             [jepsen.core :as jepsen]
             [jepsen.web :as web]
             [jepsen.cockroach :as cockroach]
+            [jepsen.cockroach.auto :as auto]
             [jepsen.cockroach [adya :as adya]
                               [bank :as bank]
                               [comments :as comments]
@@ -83,6 +84,33 @@
                   (assoc :cockroach-start-args start-args)
                   (dissoc :cockroach-start-arg))))))
 
+(defn parse-cockroach-env
+  "Validates repeated KEY=VALUE values for the CockroachDB server environment.
+  They apply to every node, after the variables the runner always sets, and
+  cover settings that CockroachDB reads only from the environment rather than
+  from start flags. VALUE may be empty."
+  [parsed]
+  (update parsed :options
+          (fn [options]
+            (let [env (:cockroach-env options)]
+              (reduce
+               (fn [seen encoded]
+                 (let [[k v] (str/split encoded #"=" 2)]
+                   (when (or (nil? v) (not (re-matches #"[A-Za-z_][A-Za-z0-9_]*" k)))
+                     (throw (IllegalArgumentException.
+                             (str "Invalid --cockroach-env " encoded
+                                  "; expected KEY=VALUE"))))
+                   (when (contains? auto/managed-env-vars k)
+                     (throw (IllegalArgumentException.
+                             (str "--cockroach-env cannot override " k))))
+                   (when (contains? seen k)
+                     (throw (IllegalArgumentException.
+                             (str "Duplicate --cockroach-env " k))))
+                   (conj seen k)))
+               #{}
+               env)
+              options))))
+
 (def opt-spec
   "Command line options for tools.cli"
   [[nil "--force-download" "Always download HTTP/S tarballs"]
@@ -92,6 +120,10 @@
 
    (jc/repeated-opt nil "--cockroach-start-arg NODE=ARG"
                     "Additional CockroachDB start argument for NODE. May be repeated."
+                    [])
+
+   (jc/repeated-opt nil "--cockroach-env KEY=VALUE"
+                    "Additional environment variable for every CockroachDB server. May be repeated."
                     [])
 
    (jc/repeated-opt nil "--nemesis NAME" "Which nemeses to use"
@@ -147,6 +179,7 @@
                      (-> parsed
                          jc/test-opt-fn
                          parse-cockroach-start-args
+                         parse-cockroach-env
                          jc/validate-tarball
                          (jc/rename-options {:nemesis   :nemeses
                                              :nemesis2  :nemeses2
